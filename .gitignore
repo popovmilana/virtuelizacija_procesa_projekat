@@ -1,0 +1,37 @@
+# Build Folders - Obavezno ignorisati
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# User-specific files (podešavanja tvog Visual Studija)
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.slnLaunch.user
+.vs/
+
+# Privremeni fajlovi i logovi
+*.ncb
+*.aps
+*.log
+*.vspscc
+*.vssscc
+*.tmp
+
+# PDB fajlovi (debug simboli, ne trebaju na GitHub-u)
+*.pdb
+
+# NuGet i paketi
+packages/
+*.nupkg
+*.snupkg
+
+# Sistemski fajlovi
+Thumbs.db
+ehthumbs.db
+
+# WCF privremeni fajlovi (samo klijentski proxy meta-podaci)
+*.svcinfo
+*.svcmap
