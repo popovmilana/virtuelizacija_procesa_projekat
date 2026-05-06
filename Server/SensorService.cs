@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Server
     public class SensorService : ISensorService
     {
         private string sessionDir;
-        //private SessionFiles sessionFiles;
+        private SessionFiles sessionFiles;
         private bool transferStarted = false;
 
         private double avgLightLevel = 0;
@@ -37,7 +38,29 @@ namespace Server
 
         public string StartSession(SessionMeta meta)
         {
-            return "Session started";
+            if (meta == null)
+                throw new FaultException("SessionMeta ne sme biti null.");
+
+            if (string.IsNullOrWhiteSpace(meta.SessionId))
+                throw new FaultException("SessionId je obavezan.");
+
+            string osnovnaPutanja = ConfigurationManager.AppSettings["SessionsPath"]
+                ?? AppDomain.CurrentDomain.BaseDirectory;
+
+            sessionDir = System.IO.Path.Combine(osnovnaPutanja, meta.SessionId);
+            System.IO.Directory.CreateDirectory(sessionDir);
+
+            sessionFiles = new SessionFiles(
+                System.IO.Path.Combine(sessionDir, "measurements_session.csv"),
+                System.IO.Path.Combine(sessionDir, "rejects.csv"));
+
+            transferStarted = false;
+            avgLightLevel = 0;
+            avgRelativeHumidity = 0;
+            avgAirQuality = 0;
+            sampleCount = 0;
+
+            return "Sesija zapoceta!";
         }
 
         public string PushSample(SensorSample sample)
@@ -47,8 +70,7 @@ namespace Server
 
         public string EndSession()
         {
-            /* if (transferStarted)
-                 events.RaiseTransferCompleted();*/
+            sessionFiles?.Dispose();
             return "Sesija zavrsena!";
 
         }
