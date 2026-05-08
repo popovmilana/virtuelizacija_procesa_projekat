@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Faults;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -65,7 +66,43 @@ namespace Server
 
         public string PushSample(SensorSample sample)
         {
-            return "Sample received";
+            if (sessionFiles == null)
+                throw new FaultException<ValidationFault>(
+                    new ValidationFault("Sesija nije pokrenuta. Pozovite StartSession."));
+
+            if (sample == null)
+                throw new FaultException<DataFormatFault>(
+                    new DataFormatFault("Sample ne sme biti null."));
+
+            string rejectReason = null;
+
+            if (sample.RelativeHumidity <= 0)
+                rejectReason = "RelativeHumidity mora biti vece od 0";
+            else if (sample.LightLevel < 0)
+                rejectReason = "LightLevel ne sme biti negativan";
+            else if (sample.AirQuality < 0)
+                rejectReason = "AirQuality ne sme biti negativan";
+
+            if (rejectReason != null)
+            {
+                sessionFiles.RejectsWriter.WriteLine(
+                    $"{sample.DateTime:yyyy-MM-dd HH:mm:ss}," +
+                    $"{sample.LightLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)}," +
+                    $"{sample.RelativeHumidity.ToString(System.Globalization.CultureInfo.InvariantCulture)}," +
+                    $"{sample.AirQuality.ToString(System.Globalization.CultureInfo.InvariantCulture)}," +
+                    $"{rejectReason}");
+                sessionFiles.RejectsWriter.Flush();
+                return $"NACK: {rejectReason}";
+            }
+
+            sessionFiles.MeasurementsWriter.WriteLine(
+                $"{sample.DateTime:yyyy-MM-dd HH:mm:ss}," +
+                $"{sample.LightLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)}," +
+                $"{sample.RelativeHumidity.ToString(System.Globalization.CultureInfo.InvariantCulture)}," +
+                $"{sample.AirQuality.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+            sessionFiles.MeasurementsWriter.Flush();
+
+            return "ACK";
         }
 
         public string EndSession()
