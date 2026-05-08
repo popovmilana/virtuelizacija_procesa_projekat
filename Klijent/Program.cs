@@ -35,22 +35,22 @@ namespace Klijent
                         Console.WriteLine(servis.StartSession(meta));
 
                         CsvLoader ucitavac = new CsvLoader();
-                        var uzorci = ucitavac.LoadCsv(out List<string> nevalidniRedovi, 130);
+                        var samples = ucitavac.LoadCsv(out List<string> invalidRows, 130);
 
                         int brojac = 0;
-                        foreach (var uzorak in uzorci)
+                        foreach (var sample in samples)
                         {
                             if (brojac == 10)
                             {
                                 Console.WriteLine("Simulacija: gubitak konekcije usred prenosa...");
                                 throw new Exception("Simulirani prekid veze");
                             }
-
-                            servis.PushSample(uzorak);
+                            string response = servis.PushSample(sample);
+                            Console.WriteLine($"[Klijent] Prenos u toku... Sample {brojac + 1}/{samples.Count} | Server: {response}");
                             Thread.Sleep(100);
                             brojac++;
                         }
-
+                        Console.WriteLine("[Klijent] Završen prenos.");
                         Console.WriteLine(servis.EndSession());
                     }
                 }

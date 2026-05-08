@@ -9,65 +9,60 @@ namespace Klijent
 {
     internal class CsvLoader
     {
-        public List<SensorSample> LoadCsv(out List<string> nevalidniRedovi, int maksRedova = 130)
+        public List<SensorSample> LoadCsv(out List<string> invalidRows, int maxRows = 130)
         {
-            nevalidniRedovi = new List<string>();
-            List<SensorSample> uzorci = new List<SensorSample>();
+            invalidRows = new List<string>();
+            List<SensorSample> samples = new List<SensorSample>();
+            string csvPath = ConfigurationManager.AppSettings["CsvPath"];
 
-            string csvPutanja = ConfigurationManager.AppSettings["CsvPath"];
+            if (!File.Exists(csvPath))
+                throw new FileNotFoundException($"CSV fajl nije pronađen: {csvPath}");
 
-            if (!File.Exists(csvPutanja))
-                throw new FileNotFoundException($"CSV fajl nije pronađen: {csvPutanja}");
-
-            using (var citac = new StreamReader(csvPutanja))
+            using (var reader = new StreamReader(csvPath))
             {
-                // Preskoči zaglavlje
-                citac.ReadLine();
+                reader.ReadLine();
+                int lineCount = 0;
 
-                int brojLinije = 0;
-                while (!citac.EndOfStream && brojLinije < maksRedova)
+                while (!reader.EndOfStream && lineCount < maxRows)
                 {
-                    string linija = citac.ReadLine();
-                    brojLinije++;
-
-                    var polja = linija.Split(',');
+                    string line = reader.ReadLine();
+                    lineCount++;
+                    var fields = line.Split(',');
 
                     try
                     {
-                        if (polja.Length < 8)
+                        if (fields.Length < 8)
                             throw new Exception("Nedovoljan broj kolona");
 
-                        SensorSample uzorak = new SensorSample
+                        SensorSample sample = new SensorSample
                         {
-                            DateTime = DateTime.Parse(polja[0], CultureInfo.InvariantCulture),
-                            LightLevel = double.Parse(polja[2], CultureInfo.InvariantCulture),
-                            RelativeHumidity = double.Parse(polja[6], CultureInfo.InvariantCulture),
-                            AirQuality = double.Parse(polja[7], CultureInfo.InvariantCulture)
+                            DateTime = DateTime.Parse(fields[0], CultureInfo.InvariantCulture),
+                            LightLevel = double.Parse(fields[2], CultureInfo.InvariantCulture),
+                            RelativeHumidity = double.Parse(fields[6], CultureInfo.InvariantCulture),
+                            AirQuality = double.Parse(fields[7], CultureInfo.InvariantCulture)
                         };
-
-                        uzorci.Add(uzorak);
+                        samples.Add(sample);
                     }
                     catch
                     {
-                        nevalidniRedovi.Add(linija);
+                        invalidRows.Add(line);
                     }
                 }
             }
 
-            if (nevalidniRedovi.Count > 0)
+            if (invalidRows.Count > 0)
             {
-                string logPutanja = ConfigurationManager.AppSettings["LogPath"];
-                using (StreamWriter logPisac = new StreamWriter(logPutanja, true))
+                string logPath = ConfigurationManager.AppSettings["LogPath"];
+                using (StreamWriter logWriter = new StreamWriter(logPath, true))
                 {
-                    foreach (var nevalidanRed in nevalidniRedovi)
-                        logPisac.WriteLine(nevalidanRed);
+                    foreach (var invalidRow in invalidRows)
+                        logWriter.WriteLine(invalidRow);
                 }
             }
 
-            Console.WriteLine($"Uspešno učitanih redova: {uzorci.Count}");
-            Console.WriteLine($"Nevalidnih redova: {nevalidniRedovi.Count}");
-
-            return uzorci;
+            Console.WriteLine($"Uspešno učitanih redova: {samples.Count}");
+            Console.WriteLine($"Nevalidnih redova: {invalidRows.Count}");
+            return samples;
         }
     }
 }

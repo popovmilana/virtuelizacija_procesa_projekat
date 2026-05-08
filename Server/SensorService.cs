@@ -102,14 +102,15 @@ namespace Server
                 $"{sample.AirQuality.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
             sessionFiles.MeasurementsWriter.Flush();
 
+            Console.WriteLine($"[Server] Prenos u toku... primljen sample {sample.DateTime:yyyy-MM-dd HH:mm:ss}");
             return "ACK";
         }
 
         public string EndSession()
         {
             sessionFiles?.Dispose();
+            Console.WriteLine("[Server] Završen prenos.");
             return "Sesija zavrsena!";
-
         }
     }
 }
