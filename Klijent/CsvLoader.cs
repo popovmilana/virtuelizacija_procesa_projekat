@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Klijent
 {
-    internal class CsvLoader
+    public class CsvLoader
     {
         public List<SensorSample> LoadCsv(out List<string> invalidRows, int maxRows = 130)
         {
