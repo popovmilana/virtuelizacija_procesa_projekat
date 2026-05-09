@@ -39,7 +39,7 @@ namespace Common
             RejectsWriter?.Dispose();
             RejectsWriter = null;
 
-            Console.WriteLine("SessionFiles resursi su oslobođeni (Dispose pozvan).");
+            Console.WriteLine("SessionFiles resursi su oslobodjeni (Dispose pozvan).");
         }
     }
 }
