@@ -10,8 +10,37 @@ namespace Klijent
     {
         static void Main(string[] args)
         {
-            TestirajDispose();
-            Console.ReadLine();
+            while (true)
+            {
+                Console.WriteLine("=====================================");
+                Console.WriteLine("   Kancelarijski senzorski sistem");
+                Console.WriteLine("=====================================");
+                Console.WriteLine("1. Pokreni prenos podataka");
+                Console.WriteLine("2. Testiraj Dispose pattern (simuliraj prekid)");
+                Console.WriteLine("0. Izlaz");
+                Console.Write("Izbor: ");
+                string izbor = Console.ReadLine();
+
+                switch (izbor)
+                {
+                    case "1":
+                        StartSessionTest();
+                        break;
+                    case "2":
+                        TestirajDispose();
+                        break;
+                    case "0":
+                        Console.WriteLine("Izlaz iz aplikacije...");
+                        return;
+                    default:
+                        Console.WriteLine("Nepoznata opcija, pokusaj ponovo.");
+                        break;
+                }
+
+                Console.WriteLine("\nPritisni Enter za povratak u meni...");
+                Console.ReadLine();
+                Console.Clear();
+            }
         }
         private static void TestirajDispose()
         {
@@ -22,6 +51,12 @@ namespace Klijent
                     new ChannelFactory<ISensorService>("SensorService"))
                 {
                     IClientChannel proksi = fabrika.CreateChannel() as IClientChannel;
+                    if (proksi == null)
+                    {
+                        Console.WriteLine("Greska pri kreiranju proksija.");
+                        return;
+                    }
+
                     using (proksi)
                     {
                         ISensorService servis = proksi as ISensorService;
@@ -45,8 +80,8 @@ namespace Klijent
                                 Console.WriteLine("Simulacija: gubitak konekcije usred prenosa...");
                                 throw new Exception("Simulirani prekid veze");
                             }
-                            string response = servis.PushSample(sample);
-                            Console.WriteLine($"[Klijent] Prenos u toku... Sample {brojac + 1}/{samples.Count} | Server: {response}");
+                            servis.PushSample(sample);
+                            Console.WriteLine($"[Klijent] Prenos u toku... Sample {brojac + 1}/{samples.Count} ");
                             Thread.Sleep(100);
                             brojac++;
                         }

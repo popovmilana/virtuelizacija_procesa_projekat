@@ -77,7 +77,7 @@ namespace Server
             return "Sesija zapoceta!";
         }
 
-        public string PushSample(SensorSample sample)
+        public void PushSample(SensorSample sample)
         {
             //validacija uzorka
             string line = $"{sample.DateTime},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
@@ -85,55 +85,63 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ",Sample je null");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("Sample ne sme biti null.");
+                throw new FaultException<DataFormatFault>(
+                    new DataFormatFault("Uzorak senzora (SensorSample) ne sme biti prazan."));
             }
 
             if(sample.DateTime == default(DateTime))
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan datum");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("DateTime je obavezan i ne sme biti default vrednost.");
+                throw new FaultException<ValidationFault>(
+                    new ValidationFault("DateTime je obavezan i ne sme biti default vrednost."));
             }
 
             if(double.IsNaN(sample.LightLevel) || double.IsInfinity(sample.LightLevel))
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan LightLevel");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("LightLevel mora biti validan broj.");
+                throw new FaultException<DataFormatFault>(
+                    new DataFormatFault("LightLevel mora biti validan broj."));
             }
 
             if(sample.LightLevel<0)
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan LightLevel");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("LightLevel ne sme biti negativan.");
+                throw new FaultException<ValidationFault>(
+                   new ValidationFault("LightLevel ne sme biti negativan."));
             }
 
             if(double.IsNaN(sample.RelativeHumidity) || double.IsInfinity(sample.RelativeHumidity))
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan RelativeHumidity");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("RelativeHumidity mora biti validan broj.");
+                throw new FaultException<DataFormatFault>(
+                    new DataFormatFault("RelativeHumidity mora biti validan broj."));
             }
 
             if(sample.RelativeHumidity<=0)
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", RelativeHumidity <= 0");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("RelativeHumidity mora biti veci od nule.");
+                throw new FaultException<ValidationFault>(
+                    new ValidationFault("RelativeHumidity mora biti veci od nule."));
             }
 
             if(double.IsNaN(sample.AirQuality) || double.IsInfinity(sample.AirQuality))
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("AirQuality mora biti validan broj.");
+                throw new FaultException<DataFormatFault>(
+                    new DataFormatFault("AirQuality mora biti validan broj."));
             }
              if(sample.AirQuality<0)
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("AirQuality ne sme biti negativan.");
+                throw new FaultException<ValidationFault>(
+                    new ValidationFault("AirQuality ne sme biti negativan."));
             }
 
             try
@@ -165,7 +173,7 @@ namespace Server
                 //detekcija nagle promene svetla
                 if (sampleCount > 0)
                 {
-                    double deltaL = Math.Abs(sample.LightLevel - lastLightLevel);
+                    double deltaL = sample.LightLevel - lastLightLevel;
 
                     if (deltaL > L_threshold)
                     {
@@ -189,7 +197,7 @@ namespace Server
                 //detekcija nagle promene RelativeHumidity
                 if (sampleCount > 0)
                 {
-                    double deltaRH = Math.Abs(sample.RelativeHumidity - lastRelativeHumidity);
+                    double deltaRH = sample.RelativeHumidity - lastRelativeHumidity;
                     if (deltaRH > RH_threshold)
                     {
                         string message;
@@ -206,7 +214,7 @@ namespace Server
                 //detekcija nagle promene AirQuality
                 if (sampleCount > 0)
                 {
-                    double deltaAQ = Math.Abs(sample.AirQuality - lastAirQuality);
+                    double deltaAQ = sample.AirQuality - lastAirQuality;
                     if (deltaAQ > AQ_threshold)
                     {
                         string message;
@@ -238,7 +246,6 @@ namespace Server
 
                 events.RaiseSampleReceived(sample);
                 Console.WriteLine("-----------------------------------------------------------");
-                return "Sample primljen i obrađen.";
             }
             catch (Exception ex)
             {
