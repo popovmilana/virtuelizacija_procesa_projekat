@@ -35,3 +35,6 @@ ehthumbs.db
 # WCF privremeni fajlovi (samo klijentski proxy meta-podaci)
 *.svcinfo
 *.svcmap
+
+
+*.csv

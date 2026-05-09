@@ -1,6 +1,5 @@
 ﻿using Common;
 using Common.Faults;
-using Common2;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -165,7 +164,7 @@ namespace Server
                     if (sample.AirQuality < avgAirQuality * 0.75)
                         warnings.Add($"AirQuality odstupa više od -25% od proseka. \n AQ={sample.AirQuality:F2} (prosek={avgAirQuality:F2}) ");
                     if (sample.AirQuality > avgAirQuality * 1.25)
-                        warnings.Add($"AirQuality odstupa više od +25% od proseka.  \n AQ={sample.LightLevel:F2} (prosek={avgAirQuality:F2})\" ");
+                        warnings.Add($"AirQuality odstupa više od +25% od proseka.  \n AQ={sample.AirQuality:F2} (prosek={avgAirQuality:F2})\" ");
 
                 }
 
@@ -175,7 +174,7 @@ namespace Server
                 {
                     double deltaL = sample.LightLevel - lastLightLevel;
 
-                    if (deltaL > L_threshold)
+                    if (Math.Abs(deltaL) > L_threshold)
                     {
                         string message;
                         if (deltaL > 0)
@@ -198,7 +197,7 @@ namespace Server
                 if (sampleCount > 0)
                 {
                     double deltaRH = sample.RelativeHumidity - lastRelativeHumidity;
-                    if (deltaRH > RH_threshold)
+                    if (Math.Abs(deltaRH) > RH_threshold)
                     {
                         string message;
                         if (deltaRH > 0)
@@ -215,7 +214,7 @@ namespace Server
                 if (sampleCount > 0)
                 {
                     double deltaAQ = sample.AirQuality - lastAirQuality;
-                    if (deltaAQ > AQ_threshold)
+                    if (Math.Abs(deltaAQ) > AQ_threshold)
                     {
                         string message;
                         if (deltaAQ > 0)
@@ -240,8 +239,7 @@ namespace Server
 
 
                 //upis u fajl 
-                string line2 = $"{sample.DateTime},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
-                sessionCSVFiles.MeasurementsWriter.WriteLine(line2);
+                sessionCSVFiles.MeasurementsWriter.WriteLine(line);
                 sessionCSVFiles.MeasurementsWriter.Flush();
 
                 events.RaiseSampleReceived(sample);
@@ -251,7 +249,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", izuzetak: " + ex.Message);
                 sessionCSVFiles.RejectsWriter.Flush();
-                throw new FaultException("Doslo je do greske prilikom obrade uzorka: " + ex.Message);
+                throw;
             }
         }
 
