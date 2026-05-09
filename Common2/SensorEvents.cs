@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Common;
-
-namespace Common2
+namespace Common
 {
     public delegate void TransferStartedEventHandler();
     public delegate void TransferCompletedEventHandler();

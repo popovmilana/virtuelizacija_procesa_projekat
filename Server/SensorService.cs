@@ -39,18 +39,12 @@ namespace Server
         {
             //pretplate na dogadjaje
             events.TransferStarted += () => Console.WriteLine("Prenos je zapocet...");
-            events.SampleReceived += (sample) => Console.WriteLine("[SAMPLE]"+sample.DateTime + ": LL=" + sample.LightLevel + " RH=" + sample.RelativeHumidity + " AQ=" + sample.AirQuality);
+            events.SampleReceived += (sample) => Console.WriteLine("[SAMPLE]" + sample.DateTime + ": LL=" + sample.LightLevel + " RH=" + sample.RelativeHumidity + " AQ=" + sample.AirQuality);
             events.TransferCompleted += () => Console.WriteLine("Prenos je zavrsen.");
-            events.WarningRaised += (message, sample) => Console.WriteLine($"[UPOZORENJE] {message} | Sample: "+sample.DateTime+": LL=sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
-            events.LightSpike += (message, sample, deltaL) => Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
+            events.WarningRaised += (message, sample) => Console.WriteLine($"[UPOZORENJE] {message} | {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}"); events.LightSpike += (message, sample, deltaL) => Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
             events.RHSpike += (message, sample, deltaRH) => Console.WriteLine($"[RH SPIKE] {message} | Delta: {deltaRH} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
             events.AQSpike += (message, sample, deltaAQ) => Console.WriteLine($"[AQ SPIKE] {message} | Delta: {deltaAQ} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
 
-        }
-
-        private void Events_WarningRaised(string message, SensorSample sample)
-        {
-            throw new NotImplementedException();
         }
 
         public string StartSession(SessionMeta meta)
@@ -181,6 +175,7 @@ namespace Server
                         else
                             message = "Nagla promena svetla: " + deltaL + ", ispod ocekivanog.";
 
+                        events.RaiseLightSpike(message, sample, deltaL);
                     }
 
                     //odstupanje +/- 25% od proseka
@@ -243,6 +238,7 @@ namespace Server
 
                 events.RaiseSampleReceived(sample);
                 Console.WriteLine("-----------------------------------------------------------");
+                return "Sample primljen i obrađen.";
             }
             catch (Exception ex)
             {
