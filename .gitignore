@@ -4,7 +4,7 @@
 [Dd]ebug/
 [Rr]elease/
 
-# User-specific files (podešavanja tvog Visual Studija)
+# User-specific files (podeï¿½avanja tvog Visual Studija)
 *.suo
 *.user
 *.userosscache
@@ -36,5 +36,3 @@ ehthumbs.db
 *.svcinfo
 *.svcmap
 
-
-*.csv
