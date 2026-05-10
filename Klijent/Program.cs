@@ -33,7 +33,9 @@ namespace Klijent
                         Console.WriteLine("Izlaz iz aplikacije...");
                         return;
                     default:
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Nepoznata opcija, pokusaj ponovo.");
+                        Console.ResetColor();
                         break;
                 }
 
@@ -44,7 +46,9 @@ namespace Klijent
         }
         private static void TestirajDispose()
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Testiranje Dispose pattern-a (simulacija prekida veze)...");
+            Console.ResetColor();
             try
             {
                 using (ChannelFactory<ISensorService> fabrika =
@@ -53,7 +57,9 @@ namespace Klijent
                     IClientChannel proksi = fabrika.CreateChannel() as IClientChannel;
                     if (proksi == null)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Greska pri kreiranju proksija.");
+                        Console.ResetColor();
                         return;
                     }
 
@@ -61,39 +67,57 @@ namespace Klijent
                     {
                         ISensorService servis = proksi as ISensorService;
 
+                        CsvLoader ucitavac = new CsvLoader();
+                        var samples = ucitavac.LoadCsv(out List<string> invalidRows, 130);
+
                         var meta = new SessionMeta
                         {
                             SessionId = Guid.NewGuid().ToString(),
-                            StartTime = DateTime.Now
+                            StartTime = DateTime.Now,
+                            Volume = 0,
+                            LightLevel = 0,
+                            RelativeHumidity = 0,
+                            AirQuality = 0
                         };
 
+                        Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(servis.StartSession(meta));
+                        Console.ResetColor();
 
-                        CsvLoader ucitavac = new CsvLoader();
-                        var samples = ucitavac.LoadCsv(out List<string> invalidRows, 130);
+
 
                         int brojac = 0;
                         foreach (var sample in samples)
                         {
                             if (brojac == 10)
                             {
+                                Console.ForegroundColor = ConsoleColor.Red;
                                 Console.WriteLine("Simulacija: gubitak konekcije usred prenosa...");
+                                Console.ResetColor();
                                 throw new Exception("Simulirani prekid veze");
                             }
                             servis.PushSample(sample);
+                            Console.ForegroundColor = ConsoleColor.Cyan;
                             Console.WriteLine($"[Klijent] Prenos u toku... Sample {brojac + 1}/{samples.Count} ");
+                            Console.ResetColor();
                             Thread.Sleep(100);
                             brojac++;
                         }
+                        Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("[Klijent] Završen prenos.");
                         Console.WriteLine(servis.EndSession());
+                        Console.ResetColor();
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Izuzetak uhvaćen: {ex.Message}");
-                Console.WriteLine("Resursi su automatski zatvoreni zahvaljujući Dispose implementaciji.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Izuzetak uhvacen: {ex.Message}");
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("Resursi su automatski zatvoreni zahvaljujuci Dispose implementaciji.");
+                Console.ResetColor(); 
             }
         }
 
@@ -105,7 +129,9 @@ namespace Klijent
 
                 if (proxy == null)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Greska pri kreiranju proxy-a.");
+                    Console.ResetColor();
                     return;
                 }
 
@@ -128,28 +154,39 @@ namespace Klijent
                             AirQuality = 0
                         };
 
+                        Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(service.StartSession(meta));
+                        Console.ResetColor();
 
+                        int brojac = 0;
                         foreach (var sample in samples)
                         {
                             try
                             {
-                                Console.WriteLine("prenos u toku . . .");
+                                Console.ForegroundColor = ConsoleColor.Cyan;
+                                Console.WriteLine($"[Klijent] Prenos u toku... Sample {++brojac}/{samples.Count}");
+                                Console.ResetColor();
                                 service.PushSample(sample);
                                 Thread.Sleep(100);
                             }
                             catch (Exception ex)
                             {
+                                Console.ForegroundColor = ConsoleColor.Red;
                                 Console.WriteLine($"Greska pri slanju sample-a: {ex.Message}");
+                                Console.ResetColor();
                             }
                         }
 
+                        Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(service.EndSession());
                         Console.WriteLine("Prenos je zavrsen.");
+                        Console.ResetColor();
                     }
                     catch (Exception ex)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Izuzetak uhvacen: {ex.Message}");
+                        Console.ResetColor();
                     }
                 }
             }

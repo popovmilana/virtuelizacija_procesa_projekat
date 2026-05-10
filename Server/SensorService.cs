@@ -38,14 +38,54 @@ namespace Server
         public SensorService()
         {
             //pretplate na dogadjaje
-            events.TransferStarted += () => Console.WriteLine("Prenos je zapocet...");
-            events.SampleReceived += (sample) => Console.WriteLine("[SAMPLE]" + sample.DateTime + ": LL=" + sample.LightLevel + " RH=" + sample.RelativeHumidity + " AQ=" + sample.AirQuality);
-            events.TransferCompleted += () => Console.WriteLine("Prenos je zavrsen.");
-            events.WarningRaised += (message, sample) => Console.WriteLine($"[UPOZORENJE] {message} | {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
-            events.LightSpike += (message, sample, deltaL) => Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
-            events.RHSpike += (message, sample, deltaRH) => Console.WriteLine($"[RH SPIKE] {message} | Delta: {deltaRH} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
-            events.AQSpike += (message, sample, deltaAQ) => Console.WriteLine($"[AQ SPIKE] {message} | Delta: {deltaAQ} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
-            events.OutOfBandWarning += (message, sample, avg) => Console.WriteLine($"[OUT OF BAND] {message} | Prosek: {avg} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
+            events.TransferStarted += () =>
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[INFO] Prenos je zapocet...");
+                Console.ResetColor();
+            };
+            events.SampleReceived += (sample) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"[SAMPLE] {sample.DateTime}: V={sample.Volume:F2} LL={sample.LightLevel:F2} RH={sample.RelativeHumidity:F2} AQ={sample.AirQuality:F2}");
+                Console.ResetColor();
+            };
+            events.TransferCompleted += () =>
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[INFO] Prenos je zavrsen.");
+                Console.ResetColor();
+            };
+            events.WarningRaised += (message, sample) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"[UPOZORENJE] {message} | {sample.DateTime}");
+                Console.ResetColor();
+            };
+            events.LightSpike += (message, sample, deltaL) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL:F2} | {sample.DateTime}");
+                Console.ResetColor();
+            };
+            events.RHSpike += (message, sample, deltaRH) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[RH SPIKE] {message} | Delta: {deltaRH:F2} | {sample.DateTime}");
+                Console.ResetColor();
+            };
+            events.AQSpike += (message, sample, deltaAQ) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[AQ SPIKE] {message} | Delta: {deltaAQ:F2} | {sample.DateTime}");
+                Console.ResetColor();
+            };
+            events.OutOfBandWarning += (message, sample, avg) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine($"[OUT-OF-BAND] {message} | Prosek: {avg:F2} | {sample.DateTime}");
+                Console.ResetColor();
+            };
         }
 
         public string StartSession(SessionMeta meta)
@@ -80,14 +120,6 @@ namespace Server
         public void PushSample(SensorSample sample)
         {
             //validacija uzorka
-            /* string line = $"{sample.DateTime},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
-             if (sample == null)
-             {
-                 sessionCSVFiles.RejectsWriter.WriteLine(line + ",Sample je null");
-                 sessionCSVFiles.RejectsWriter.Flush();
-                 throw new FaultException<DataFormatFault>(
-                     new DataFormatFault("Uzorak senzora (SensorSample) ne sme biti prazan."));
-             }*/
             if (sample == null)
             {
                 throw new FaultException<DataFormatFault>(
@@ -95,7 +127,8 @@ namespace Server
             }
 
             if (sessionCSVFiles == null)
-                throw new FaultException("StartSession nije pozvan pre PushSample.");
+                throw new FaultException<ValidationFault>(
+                     new ValidationFault("StartSession nije pozvan pre PushSample."));
 
             string line = $"{sample.DateTime},{sample.Volume},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
             if (sample.DateTime == default(DateTime))

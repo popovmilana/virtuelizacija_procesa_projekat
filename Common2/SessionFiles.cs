@@ -24,10 +24,10 @@ namespace Common
             RejectsWriter = new StreamWriter(
                 File.Open(RejectsFilePath, FileMode.Create, FileAccess.Write));
 
-            MeasurementsWriter.WriteLine("DateTime,LightLevel,RelativeHumidity,AirQuality");
+            MeasurementsWriter.WriteLine("DateTime,Volume,LightLevel,RelativeHumidity,AirQuality");
             MeasurementsWriter.Flush();
 
-            RejectsWriter.WriteLine("DateTime,LightLevel,RelativeHumidity,AirQuality,Razlog");
+            RejectsWriter.WriteLine("DateTime,Volume,LightLevel,RelativeHumidity,AirQuality,Razlog");
             RejectsWriter.Flush();
         }
 
@@ -39,7 +39,9 @@ namespace Common
             RejectsWriter?.Dispose();
             RejectsWriter = null;
 
-            Console.WriteLine("SessionFiles resursi su oslobodjeni (Dispose pozvan).");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("[DISPOSE] SessionFiles resursi su oslobodjeni.");
+            Console.ResetColor();
         }
     }
 }
