@@ -109,20 +109,26 @@ namespace Klijent
                     return;
                 }
 
-                using (proxy) 
+                using (proxy)
                 {
                     try
                     {
                         ISensorService service = (ISensorService)proxy;
-                        var meta = new SessionMeta
-                        {
-                            SessionId = Guid.NewGuid().ToString(),
-                            StartTime = DateTime.Now
-                        };
-                        Console.WriteLine(service.StartSession(meta));
 
                         CsvLoader loader = new CsvLoader();
                         var samples = loader.LoadCsv(out List<string> invalidRows, 130);
+
+                        var meta = new SessionMeta
+                        {
+                            SessionId = Guid.NewGuid().ToString(),
+                            StartTime = DateTime.Now,
+                            Volume = 0,
+                            LightLevel = 0,
+                            RelativeHumidity = 0,
+                            AirQuality = 0
+                        };
+
+                        Console.WriteLine(service.StartSession(meta));
 
                         foreach (var sample in samples)
                         {
@@ -148,5 +154,5 @@ namespace Klijent
                 }
             }
         }
-        }
+    }
 }

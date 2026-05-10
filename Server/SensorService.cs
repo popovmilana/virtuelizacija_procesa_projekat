@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Server
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class SensorService : ISensorService
     {
         private string sessionDir;
@@ -40,17 +41,17 @@ namespace Server
             events.TransferStarted += () => Console.WriteLine("Prenos je zapocet...");
             events.SampleReceived += (sample) => Console.WriteLine("[SAMPLE]" + sample.DateTime + ": LL=" + sample.LightLevel + " RH=" + sample.RelativeHumidity + " AQ=" + sample.AirQuality);
             events.TransferCompleted += () => Console.WriteLine("Prenos je zavrsen.");
-            events.WarningRaised += (message, sample) => Console.WriteLine($"[UPOZORENJE] {message} | {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}"); events.LightSpike += (message, sample, deltaL) => Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
+            events.WarningRaised += (message, sample) => Console.WriteLine($"[UPOZORENJE] {message} | {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
+            events.LightSpike += (message, sample, deltaL) => Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
             events.RHSpike += (message, sample, deltaRH) => Console.WriteLine($"[RH SPIKE] {message} | Delta: {deltaRH} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
             events.AQSpike += (message, sample, deltaAQ) => Console.WriteLine($"[AQ SPIKE] {message} | Delta: {deltaAQ} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
-
+            events.OutOfBandWarning += (message, sample, avg) => Console.WriteLine($"[OUT OF BAND] {message} | Prosek: {avg} | Sample: {sample.DateTime}: LL={sample.LightLevel} RH={sample.RelativeHumidity} AQ={sample.AirQuality}");
         }
 
         public string StartSession(SessionMeta meta)
         {
             if (meta == null)
-                throw new FaultException("SessionMeta ne sme biti null.");
-            //throw new FaultException<DataFormatFault>(new DataFormatFault("SessionMeta ne sme biti null."));
+                throw new FaultException<DataFormatFault>(new DataFormatFault("SessionMeta ne sme biti null."));
 
 
             if (string.IsNullOrWhiteSpace(meta.SessionId))
@@ -79,16 +80,25 @@ namespace Server
         public void PushSample(SensorSample sample)
         {
             //validacija uzorka
-            string line = $"{sample.DateTime},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
+            /* string line = $"{sample.DateTime},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
+             if (sample == null)
+             {
+                 sessionCSVFiles.RejectsWriter.WriteLine(line + ",Sample je null");
+                 sessionCSVFiles.RejectsWriter.Flush();
+                 throw new FaultException<DataFormatFault>(
+                     new DataFormatFault("Uzorak senzora (SensorSample) ne sme biti prazan."));
+             }*/
             if (sample == null)
             {
-                sessionCSVFiles.RejectsWriter.WriteLine(line + ",Sample je null");
-                sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("Uzorak senzora (SensorSample) ne sme biti prazan."));
             }
 
-            if(sample.DateTime == default(DateTime))
+            if (sessionCSVFiles == null)
+                throw new FaultException("StartSession nije pozvan pre PushSample.");
+
+            string line = $"{sample.DateTime},{sample.Volume},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
+            if (sample.DateTime == default(DateTime))
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan datum");
                 sessionCSVFiles.RejectsWriter.Flush();
@@ -243,6 +253,9 @@ namespace Server
                 sessionCSVFiles.MeasurementsWriter.Flush();
 
                 events.RaiseSampleReceived(sample);
+                foreach (var warning in warnings)
+                    events.RaiseWarning(warning, sample);
+
                 Console.WriteLine("-----------------------------------------------------------");
             }
             catch (Exception ex)

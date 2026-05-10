@@ -37,6 +37,7 @@ namespace Klijent
                         SensorSample sample = new SensorSample
                         {
                             DateTime = DateTime.Parse(fields[0], CultureInfo.InvariantCulture),
+                            Volume = double.Parse(fields[1], CultureInfo.InvariantCulture),
                             LightLevel = double.Parse(fields[2], CultureInfo.InvariantCulture),
                             RelativeHumidity = double.Parse(fields[6], CultureInfo.InvariantCulture),
                             AirQuality = double.Parse(fields[7], CultureInfo.InvariantCulture)
