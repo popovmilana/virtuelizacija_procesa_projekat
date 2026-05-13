@@ -14,6 +14,8 @@ namespace Common
         public string MeasurementsFilePath { get; private set; }
         public string RejectsFilePath { get; private set; }
 
+        private bool disposed = false;
+
         public SessionFiles(string putanjaMerenja, string putanjaOdbacenih)
         {
             MeasurementsFilePath = putanjaMerenja;
@@ -31,17 +33,34 @@ namespace Common
             RejectsWriter.Flush();
         }
 
+        ~SessionFiles()
+        {
+            Dispose(false);
+        }
+
         public void Dispose()
         {
-            MeasurementsWriter?.Dispose();
-            MeasurementsWriter = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    MeasurementsWriter?.Dispose();
+                    MeasurementsWriter = null;
 
-            RejectsWriter?.Dispose();
-            RejectsWriter = null;
+                    RejectsWriter?.Dispose();
+                    RejectsWriter = null;
 
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("[DISPOSE] SessionFiles resursi su oslobodjeni.");
-            Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("[DISPOSE] SessionFiles resursi su oslobodjeni.");
+                    Console.ResetColor();
+                }
+                disposed = true;
+            }
         }
     }
 }

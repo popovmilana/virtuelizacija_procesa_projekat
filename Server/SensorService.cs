@@ -178,7 +178,14 @@ namespace Server
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("AirQuality mora biti validan broj."));
             }
-             if(sample.AirQuality<0)
+            if(double.IsNaN(sample.Volume) || double.IsInfinity(sample.Volume))
+            {
+                sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan Volume");
+                sessionCSVFiles.RejectsWriter.Flush();
+                throw new FaultException<DataFormatFault>(
+                    new DataFormatFault("Volume mora biti validan broj."));
+            }
+                if (sample.AirQuality<0)
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
@@ -251,6 +258,10 @@ namespace Server
                         events.RaiseRHSpike(message, sample, deltaRH);
                     }
 
+                    if (sample.RelativeHumidity < avgRelativeHumidity * 0.75)
+                        events.RaiseOutOfBandWarning("RelativeHumidity ispod ocekivane vrednosti", sample, avgRelativeHumidity);
+                    else if (sample.RelativeHumidity > avgRelativeHumidity * 1.25)
+                        events.RaiseOutOfBandWarning("RelativeHumidity iznad ocekivane vrednosti", sample, avgRelativeHumidity);
                 }
 
                 //detekcija nagle promene AirQuality
@@ -267,6 +278,11 @@ namespace Server
 
                         events.RaiseAQSpike(message, sample, deltaAQ);
                     }
+
+                    if (sample.AirQuality < avgAirQuality * 0.75)
+                        events.RaiseOutOfBandWarning("AirQuality ispod ocekivane vrednosti", sample, avgAirQuality);
+                    else if (sample.AirQuality > avgAirQuality * 1.25)
+                        events.RaiseOutOfBandWarning("AirQuality iznad ocekivane vrednosti", sample, avgAirQuality);
                 }
 
 
@@ -285,6 +301,9 @@ namespace Server
                 sessionCSVFiles.MeasurementsWriter.WriteLine(line);
                 sessionCSVFiles.MeasurementsWriter.Flush();
 
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine($"[Server] Prenos u toku... primljen uzorak {sampleCount}/{sampleCount}");
+                Console.ResetColor();
                 events.RaiseSampleReceived(sample);
                 foreach (var warning in warnings)
                     events.RaiseWarning(warning, sample);
@@ -295,12 +314,17 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", izuzetak: " + ex.Message);
                 sessionCSVFiles.RejectsWriter.Flush();
+                sessionCSVFiles.Dispose();
                 throw;
             }
         }
 
         public string EndSession()
         {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("[Server] Završen prenos.");
+            Console.ResetColor();
+            
             if (transferStarted)
                 events.RaiseTransferCompleted();
 
