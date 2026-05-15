@@ -67,7 +67,7 @@ namespace Server
         private void OnSampleReceivedHandler(object sender, SampleEventArgs e)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"[SAMPLE] {e.Sample.DateTime}: V={e.Sample.Volume:F2} LL={e.Sample.LightLevel:F2} RH={e.Sample.RelativeHumidity:F2} AQ={e.Sample.AirQuality:F2}");
+            Console.WriteLine($"[SAMPLE {sampleCount}] {e.Sample.DateTime}: V={e.Sample.Volume:F2} LL={e.Sample.LightLevel:F2} RH={e.Sample.RelativeHumidity:F2} AQ={e.Sample.AirQuality:F2}");
             Console.ResetColor();
         }
 
@@ -140,12 +140,14 @@ namespace Server
             if (sample == null)
             {
                 throw new FaultException<DataFormatFault>(
-                    new DataFormatFault("Uzorak senzora (SensorSample) ne sme biti prazan."));
+                    new DataFormatFault("Uzorak senzora (SensorSample) ne sme biti prazan."),
+                    new FaultReason("Uzorak senzora (SensorSample) ne sme biti prazan."));
             }
 
             if (sessionCSVFiles == null)
                 throw new FaultException<ValidationFault>(
-                     new ValidationFault("StartSession nije pozvan pre PushSample."));
+                     new ValidationFault("StartSession nije pozvan pre PushSample."),
+                     new FaultReason("StartSession nije pozvan pre PushSample."));
 
             string line = $"{sample.DateTime},{sample.Volume},{sample.LightLevel},{sample.RelativeHumidity},{sample.AirQuality}";
             if (sample.DateTime == default(DateTime))
@@ -153,7 +155,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan datum");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<ValidationFault>(
-                    new ValidationFault("DateTime je obavezan i ne sme biti default vrednost."));
+                    new ValidationFault("DateTime je obavezan i ne sme biti default vrednost."),
+                    new FaultReason("DateTime je obavezan i ne sme biti default vrednost."));
             }
 
             if(double.IsNaN(sample.LightLevel) || double.IsInfinity(sample.LightLevel))
@@ -161,7 +164,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan LightLevel");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<DataFormatFault>(
-                    new DataFormatFault("LightLevel mora biti validan broj."));
+                    new DataFormatFault("LightLevel mora biti validan broj."),
+                    new FaultReason("LightLevel mora biti validan broj."));
             }
 
             if(sample.LightLevel<0)
@@ -169,7 +173,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan LightLevel");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<ValidationFault>(
-                   new ValidationFault("LightLevel ne sme biti negativan."));
+                   new ValidationFault("LightLevel ne sme biti negativan."),
+                   new FaultReason("LightLevel ne sme biti negativan."));
             }
 
             if(double.IsNaN(sample.RelativeHumidity) || double.IsInfinity(sample.RelativeHumidity))
@@ -177,7 +182,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan RelativeHumidity");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<DataFormatFault>(
-                    new DataFormatFault("RelativeHumidity mora biti validan broj."));
+                    new DataFormatFault("RelativeHumidity mora biti validan broj."),
+                    new FaultReason("RelativeHumidity mora biti validan broj."));
             }
 
             if(sample.RelativeHumidity<=0)
@@ -185,7 +191,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", RelativeHumidity <= 0");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<ValidationFault>(
-                    new ValidationFault("RelativeHumidity mora biti veci od nule."));
+                    new ValidationFault("RelativeHumidity mora biti veci od nule."),
+                    new FaultReason("RelativeHumidity mora biti veci od nule."));
             }
 
             if(double.IsNaN(sample.AirQuality) || double.IsInfinity(sample.AirQuality))
@@ -193,14 +200,16 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<DataFormatFault>(
-                    new DataFormatFault("AirQuality mora biti validan broj."));
+                    new DataFormatFault("AirQuality mora biti validan broj."),
+                    new FaultReason("AirQuality mora biti validan broj."));
             }
                 if (sample.AirQuality<0)
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<ValidationFault>(
-                    new ValidationFault("AirQuality ne sme biti negativan."));
+                    new ValidationFault("AirQuality ne sme biti negativan."),
+                    new FaultReason("AirQuality ne sme biti negativan."));
             }
 
             if(double.IsNaN(sample.Volume) || double.IsInfinity(sample.Volume))
@@ -208,7 +217,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan Volume");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<DataFormatFault>(
-                    new DataFormatFault("Volume mora biti validan broj."));
+                    new DataFormatFault("Volume mora biti validan broj."),
+                     new FaultReason("Volume mora biti validan broj."));
             }
 
             if (sample.Volume < 0)
@@ -216,7 +226,8 @@ namespace Server
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan Volume");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<ValidationFault>(
-                    new ValidationFault("Volume ne sme biti negativan."));
+                    new ValidationFault("Volume ne sme biti negativan."),
+                    new FaultReason("Volume ne sme biti negativan."));
             }
 
             try
@@ -327,9 +338,9 @@ namespace Server
                 sessionCSVFiles.MeasurementsWriter.WriteLine(line);
                 sessionCSVFiles.MeasurementsWriter.Flush();
 
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine($"[Server] Prenos u toku... primljen uzorak {sampleCount}/{sampleCount}");
-                Console.ResetColor();
+                /*Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine($"[Server] Prenos u toku... primljen uzorak {sampleCount}/130");
+                Console.ResetColor();*/
                 events.RaiseSampleReceived(sample);
                 foreach (var warning in warnings)
                     events.RaiseWarning(warning, sample);
@@ -347,9 +358,9 @@ namespace Server
 
         public string EndSession()
         {
-            Console.ForegroundColor = ConsoleColor.Green;
+            /*Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("[Server] Završen prenos.");
-            Console.ResetColor();
+            Console.ResetColor();*/
             
             if (transferStarted)
                 events.RaiseTransferCompleted();

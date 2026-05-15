@@ -94,6 +94,7 @@ namespace Klijent
                                 Console.ForegroundColor = ConsoleColor.Red;
                                 Console.WriteLine("Simulacija: gubitak konekcije usred prenosa...");
                                 Console.ResetColor();
+                                //servis.EndSession();
                                 throw new Exception("Simulirani prekid veze");
                             }
                             servis.PushSample(sample);

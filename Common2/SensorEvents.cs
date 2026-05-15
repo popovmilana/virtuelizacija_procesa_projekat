@@ -6,17 +6,19 @@ using System.Threading.Tasks;
 using Common2.Events;
 namespace Common
 {
-    public delegate void TransferEventHandler(object sender, EventArgs e);
-    public delegate void SampleEventHandler(object sender, SampleEventArgs e);
-    public delegate void WarningEventHandler(object sender, WarningEventArgs e);
-
-    public delegate void LightSpikeEventHandler(object sender, LightSpikeEventArgs e);
-    public delegate void OutOfBandEventHandler(object sender,OutOfBandEventArgs e);
-    
-    public delegate void RHSpikeEventHandler(object sender, RHSpikeEventArgs e);
-    public delegate void AQSpikeEventHandler(object sender, AQSpikeEventArgs e);
     public class SensorEvents
     {
+        public delegate void TransferEventHandler(object sender, EventArgs e);
+        public delegate void SampleEventHandler(object sender, SampleEventArgs e);
+        public delegate void WarningEventHandler(object sender, WarningEventArgs e);
+
+        public delegate void LightSpikeEventHandler(object sender, LightSpikeEventArgs e);
+        public delegate void OutOfBandEventHandler(object sender,OutOfBandEventArgs e);
+    
+        public delegate void RHSpikeEventHandler(object sender, RHSpikeEventArgs e);
+        public delegate void AQSpikeEventHandler(object sender, AQSpikeEventArgs e);
+
+
         public event TransferEventHandler OnTransferStarted;
         public event TransferEventHandler OnTransferCompleted;
         public event SampleEventHandler OnSampleReceived;
