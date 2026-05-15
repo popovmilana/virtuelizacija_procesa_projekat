@@ -73,7 +73,7 @@ namespace Klijent
                         var meta = new SessionMeta
                         {
                             SessionId = Guid.NewGuid().ToString(),
-                            StartTime = DateTime.Now,
+                            DateTime = DateTime.Now,
                             Volume = 0,
                             LightLevel = 0,
                             RelativeHumidity = 0,
@@ -148,7 +148,7 @@ namespace Klijent
                         var meta = new SessionMeta
                         {
                             SessionId = Guid.NewGuid().ToString(),
-                            StartTime = DateTime.Now,
+                            DateTime = DateTime.Now,
                             Volume = 0,
                             LightLevel = 0,
                             RelativeHumidity = 0,

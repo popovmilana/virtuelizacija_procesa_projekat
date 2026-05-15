@@ -54,6 +54,9 @@ namespace Klijent
             if (invalidRows.Count > 0)
             {
                 string logPath = ConfigurationManager.AppSettings["LogPath"];
+
+                //Console.WriteLine($"Log path: {Path.GetFullPath(logPath)}");
+
                 using (StreamWriter logWriter = new StreamWriter(logPath, true))
                 {
                     foreach (var invalidRow in invalidRows)
