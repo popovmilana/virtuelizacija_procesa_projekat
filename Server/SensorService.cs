@@ -178,6 +178,14 @@ namespace Server
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("AirQuality mora biti validan broj."));
             }
+                if (sample.AirQuality<0)
+            {
+                sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan AirQuality");
+                sessionCSVFiles.RejectsWriter.Flush();
+                throw new FaultException<ValidationFault>(
+                    new ValidationFault("AirQuality ne sme biti negativan."));
+            }
+
             if(double.IsNaN(sample.Volume) || double.IsInfinity(sample.Volume))
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan Volume");
@@ -185,12 +193,13 @@ namespace Server
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("Volume mora biti validan broj."));
             }
-                if (sample.AirQuality<0)
+
+            if (sample.Volume < 0)
             {
-                sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan AirQuality");
+                sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan Volume");
                 sessionCSVFiles.RejectsWriter.Flush();
                 throw new FaultException<ValidationFault>(
-                    new ValidationFault("AirQuality ne sme biti negativan."));
+                    new ValidationFault("Volume ne sme biti negativan."));
             }
 
             try
