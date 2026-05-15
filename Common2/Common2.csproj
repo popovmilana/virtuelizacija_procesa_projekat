@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\AQSpikeEventArgs.cs" />
+    <Compile Include="Events\LightSpikeEventArgs.cs" />
+    <Compile Include="Events\OutOfBandEventArgs.cs" />
+    <Compile Include="Events\RHSpikeEventArgs.cs" />
+    <Compile Include="Events\SampleEventArgs.cs" />
+    <Compile Include="Events\WarningEventArgs.cs" />
     <Compile Include="Faults\DataFormatFault.cs" />
     <Compile Include="Faults\ValidationFault.cs" />
     <Compile Include="ISensorService.cs" />

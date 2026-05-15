@@ -9,6 +9,8 @@ using System.Linq;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using Common2.Events;
+using System.Runtime.CompilerServices;
 
 namespace Server
 {
@@ -38,56 +40,71 @@ namespace Server
         public SensorService()
         {
             //pretplate na dogadjaje
-            events.TransferStarted += () =>
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("[INFO] Prenos je zapocet...");
-                Console.ResetColor();
-            };
-            events.SampleReceived += (sample) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"[SAMPLE] {sample.DateTime}: V={sample.Volume:F2} LL={sample.LightLevel:F2} RH={sample.RelativeHumidity:F2} AQ={sample.AirQuality:F2}");
-                Console.ResetColor();
-            };
-            events.TransferCompleted += () =>
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("[INFO] Prenos je zavrsen.");
-                Console.ResetColor();
-            };
-            events.WarningRaised += (message, sample) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"[UPOZORENJE] {message} | {sample.DateTime}");
-                Console.ResetColor();
-            };
-            events.LightSpike += (message, sample, deltaL) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[LIGHT SPIKE] {message} | Delta: {deltaL:F2} | {sample.DateTime}");
-                Console.ResetColor();
-            };
-            events.RHSpike += (message, sample, deltaRH) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[RH SPIKE] {message} | Delta: {deltaRH:F2} | {sample.DateTime}");
-                Console.ResetColor();
-            };
-            events.AQSpike += (message, sample, deltaAQ) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[AQ SPIKE] {message} | Delta: {deltaAQ:F2} | {sample.DateTime}");
-                Console.ResetColor();
-            };
-            events.OutOfBandWarning += (message, sample, avg) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine($"[OUT-OF-BAND] {message} | Prosek: {avg:F2} | {sample.DateTime}");
-                Console.ResetColor();
-            };
+            events.OnTransferStarted += OnTransferStartedHandler;
+            events.OnSampleReceived += OnSampleReceivedHandler;
+            events.OnTransferCompleted += OnTransferCompletedHandler;
+            events.OnWarningRaised += OnWarningRaisedHandler;
+            events.LightSpike += OnLightSpikeHandler;
+            events.RHSpike += OnRHSpikeHandler;
+            events.AQSpike += OnAQSpikeHandler;
+            events.OutOfBandWarning += OnOutOfBandWarningHandler;
         }
 
+        private void OnTransferStartedHandler(object sender, EventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("[INFO] Prenos je zapocet...");
+            Console.ResetColor();
+        }
+
+        private void OnTransferCompletedHandler(object sender, EventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("[INFO] Prenos je zavrsen.");
+            Console.ResetColor();
+        }
+
+        private void OnSampleReceivedHandler(object sender, SampleEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"[SAMPLE] {e.Sample.DateTime}: V={e.Sample.Volume:F2} LL={e.Sample.LightLevel:F2} RH={e.Sample.RelativeHumidity:F2} AQ={e.Sample.AirQuality:F2}");
+            Console.ResetColor();
+        }
+
+        private void OnWarningRaisedHandler(object sender, WarningEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"[UPOZORENJE] {e.Message} | {e.Sample.DateTime}");
+            Console.ResetColor();
+        }
+
+        private void OnLightSpikeHandler(object sender, LightSpikeEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[LIGHT SPIKE] {e.Message} | Delta: {e.DeltaL:F2} | {e.Sample.DateTime}");
+            Console.ResetColor();
+        }
+
+        private void OnRHSpikeHandler(object sender, RHSpikeEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[RH SPIKE] {e.Message} | Delta: {e.DeltaRH:F2} | {e.Sample.DateTime}");
+            Console.ResetColor();
+        }
+
+        private void OnAQSpikeHandler(object sender, AQSpikeEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[AQ SPIKE] {e.Message} | Delta: {e.DeltaAQ:F2} | {e.Sample.DateTime}");
+            Console.ResetColor();
+        }
+
+        private void OnOutOfBandWarningHandler(object sender, OutOfBandEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"[OUT-OF-BAND] {e.Message} | Prosek: {e.Average:F2} | {e.Sample.DateTime}");
+            Console.ResetColor();
+        }
         public string StartSession(SessionMeta meta)
         {
             if (meta == null)
