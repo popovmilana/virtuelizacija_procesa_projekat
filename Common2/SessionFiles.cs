@@ -14,6 +14,8 @@ namespace Common
         public string MeasurementsFilePath { get; private set; }
         public string RejectsFilePath { get; private set; }
 
+        private bool disposed = false;
+
         public SessionFiles(string putanjaMerenja, string putanjaOdbacenih)
         {
             MeasurementsFilePath = putanjaMerenja;
@@ -24,22 +26,41 @@ namespace Common
             RejectsWriter = new StreamWriter(
                 File.Open(RejectsFilePath, FileMode.Create, FileAccess.Write));
 
-            MeasurementsWriter.WriteLine("DateTime,LightLevel,RelativeHumidity,AirQuality");
+            MeasurementsWriter.WriteLine("DateTime,Volume,LightLevel,RelativeHumidity,AirQuality");
             MeasurementsWriter.Flush();
 
-            RejectsWriter.WriteLine("DateTime,LightLevel,RelativeHumidity,AirQuality,Razlog");
+            RejectsWriter.WriteLine("DateTime,Volume,LightLevel,RelativeHumidity,AirQuality,Razlog");
             RejectsWriter.Flush();
+        }
+
+        ~SessionFiles()
+        {
+            Dispose(false);
         }
 
         public void Dispose()
         {
-            MeasurementsWriter?.Dispose();
-            MeasurementsWriter = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    MeasurementsWriter?.Dispose();
+                    MeasurementsWriter = null;
 
-            RejectsWriter?.Dispose();
-            RejectsWriter = null;
+                    RejectsWriter?.Dispose();
+                    RejectsWriter = null;
 
-            Console.WriteLine("SessionFiles resursi su oslobođeni (Dispose pozvan).");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("[DISPOSE] SessionFiles resursi su oslobodjeni.");
+                    Console.ResetColor();
+                }
+                disposed = true;
+            }
         }
     }
 }

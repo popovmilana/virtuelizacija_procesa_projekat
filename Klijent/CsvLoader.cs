@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Klijent
 {
-    internal class CsvLoader
+    public class CsvLoader
     {
         public List<SensorSample> LoadCsv(out List<string> invalidRows, int maxRows = 130)
         {
@@ -37,6 +37,7 @@ namespace Klijent
                         SensorSample sample = new SensorSample
                         {
                             DateTime = DateTime.Parse(fields[0], CultureInfo.InvariantCulture),
+                            Volume = double.Parse(fields[1], CultureInfo.InvariantCulture),
                             LightLevel = double.Parse(fields[2], CultureInfo.InvariantCulture),
                             RelativeHumidity = double.Parse(fields[6], CultureInfo.InvariantCulture),
                             AirQuality = double.Parse(fields[7], CultureInfo.InvariantCulture)
@@ -53,6 +54,9 @@ namespace Klijent
             if (invalidRows.Count > 0)
             {
                 string logPath = ConfigurationManager.AppSettings["LogPath"];
+
+                //Console.WriteLine($"Log path: {Path.GetFullPath(logPath)}");
+
                 using (StreamWriter logWriter = new StreamWriter(logPath, true))
                 {
                     foreach (var invalidRow in invalidRows)

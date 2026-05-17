@@ -4,7 +4,7 @@
 [Dd]ebug/
 [Rr]elease/
 
-# User-specific files (podešavanja tvog Visual Studija)
+# User-specific files (podeï¿½avanja tvog Visual Studija)
 *.suo
 *.user
 *.userosscache
@@ -35,3 +35,6 @@ ehthumbs.db
 # WCF privremeni fajlovi (samo klijentski proxy meta-podaci)
 *.svcinfo
 *.svcmap
+
+
+**/AirPi Data - AirPi.csv

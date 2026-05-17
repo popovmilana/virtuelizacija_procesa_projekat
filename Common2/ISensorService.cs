@@ -18,7 +18,7 @@ namespace Common
         [OperationContract]
         [FaultContract(typeof(DataFormatFault))]
         [FaultContract(typeof(ValidationFault))]
-        string PushSample(SensorSample sample);
+        void PushSample(SensorSample sample);
 
         [OperationContract]
         [FaultContract(typeof(DataFormatFault))]
