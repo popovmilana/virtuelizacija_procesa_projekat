@@ -160,6 +160,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan datum");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Nevalidan DateTime - uzorak odbacen", sample);
                 throw new FaultException<ValidationFault>(
                     new ValidationFault("DateTime je obavezan i ne sme biti default vrednost."),
                     new FaultReason("DateTime je obavezan i ne sme biti default vrednost."));
@@ -169,6 +170,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan LightLevel");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Nevalidan LightLevel - uzorak odbacen", sample);
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("LightLevel mora biti validan broj."),
                     new FaultReason("LightLevel mora biti validan broj."));
@@ -178,6 +180,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan LightLevel");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Negativan LightLevel - uzorak odbacen", sample);
                 throw new FaultException<ValidationFault>(
                    new ValidationFault("LightLevel ne sme biti negativan."),
                    new FaultReason("LightLevel ne sme biti negativan."));
@@ -187,6 +190,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan RelativeHumidity");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Nevalidan RelativeHumidity - uzorak odbacen", sample);
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("RelativeHumidity mora biti validan broj."),
                     new FaultReason("RelativeHumidity mora biti validan broj."));
@@ -196,6 +200,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", RelativeHumidity <= 0");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("RelativeHumidity <= 0 - uzorak odbacen", sample);
                 throw new FaultException<ValidationFault>(
                     new ValidationFault("RelativeHumidity mora biti veci od nule."),
                     new FaultReason("RelativeHumidity mora biti veci od nule."));
@@ -205,6 +210,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Nevalidan AirQuality - uzorak odbacen", sample);
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("AirQuality mora biti validan broj."),
                     new FaultReason("AirQuality mora biti validan broj."));
@@ -213,6 +219,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan AirQuality");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Negativan AirQuality - uzorak odbacen", sample);
                 throw new FaultException<ValidationFault>(
                     new ValidationFault("AirQuality ne sme biti negativan."),
                     new FaultReason("AirQuality ne sme biti negativan."));
@@ -222,6 +229,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", nevalidan Volume");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Nevalidan Volume - uzorak odbacen", sample);
                 throw new FaultException<DataFormatFault>(
                     new DataFormatFault("Volume mora biti validan broj."),
                      new FaultReason("Volume mora biti validan broj."));
@@ -231,6 +239,7 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", negativan Volume");
                 sessionCSVFiles.RejectsWriter.Flush();
+                events.RaiseWarning("Negativan Volume - uzorak odbacen", sample);
                 throw new FaultException<ValidationFault>(
                     new ValidationFault("Volume ne sme biti negativan."),
                     new FaultReason("Volume ne sme biti negativan."));
