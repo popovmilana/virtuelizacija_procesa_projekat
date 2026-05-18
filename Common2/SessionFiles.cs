@@ -47,13 +47,14 @@ namespace Common
         {
             if (!disposed)
             {
+                   MeasurementsWriter?.Dispose();
+                   MeasurementsWriter = null;
+
+                   RejectsWriter?.Dispose();
+                   RejectsWriter = null;
+
                 if (disposing)
                 {
-                    MeasurementsWriter?.Dispose();
-                    MeasurementsWriter = null;
-
-                    RejectsWriter?.Dispose();
-                    RejectsWriter = null;
 
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("[DISPOSE] SessionFiles resursi su oslobodjeni.");

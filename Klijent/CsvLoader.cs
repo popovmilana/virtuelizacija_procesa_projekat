@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 
 namespace Klijent
 {
@@ -13,6 +14,7 @@ namespace Klijent
         {
             invalidRows = new List<string>();
             List<SensorSample> samples = new List<SensorSample>();
+            List<string> extraRows = new List<string>();
             string csvPath = ConfigurationManager.AppSettings["CsvPath"];
 
             if (!File.Exists(csvPath))
@@ -49,18 +51,29 @@ namespace Klijent
                         invalidRows.Add(line);
                     }
                 }
-            }
 
-            if (invalidRows.Count > 0)
+                //redovi viska
+                while (!reader.EndOfStream)
+                {
+                    string extraLine = reader.ReadLine();
+                    extraRows.Add(extraLine);
+                }
+            }
+            if (invalidRows.Count > 0 || extraRows.Count>0)
             {
                 string logPath = ConfigurationManager.AppSettings["LogPath"];
 
                 //Console.WriteLine($"Log path: {Path.GetFullPath(logPath)}");
 
-                using (StreamWriter logWriter = new StreamWriter(logPath, true))
+                using (StreamWriter logWriter = new StreamWriter(logPath, false))
                 {
+                    logWriter.WriteLine("===========SESIJA " + DateTime.Now.ToString() + "============\n");
                     foreach (var invalidRow in invalidRows)
-                        logWriter.WriteLine(invalidRow);
+                        logWriter.WriteLine("[NEVALIDAN] "+invalidRow);
+
+                    foreach (var extraRow in extraRows)
+                        logWriter.WriteLine("[VISAK] " + extraRow);
+                    logWriter.WriteLine();
                 }
             }
 

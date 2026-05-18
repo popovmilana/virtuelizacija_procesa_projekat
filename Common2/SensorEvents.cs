@@ -23,6 +23,7 @@ namespace Common
         public event TransferEventHandler OnTransferCompleted;
         public event SampleEventHandler OnSampleReceived;
         public event WarningEventHandler OnWarningRaised;
+
         public event LightSpikeEventHandler LightSpike;
         public event OutOfBandEventHandler OutOfBandWarning;
         public event RHSpikeEventHandler RHSpike;
