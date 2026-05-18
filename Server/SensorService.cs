@@ -241,7 +241,13 @@ namespace Server
                 if (!transferStarted)
                     transferStarted = true;
 
-                List<string> warnings = new List<string>();
+                sampleCount++;
+                avgLightLevel = (avgLightLevel * (sampleCount - 1) + sample.LightLevel) / sampleCount;
+                avgRelativeHumidity = (avgRelativeHumidity * (sampleCount - 1) + sample.RelativeHumidity) / sampleCount;
+                avgAirQuality = (avgAirQuality * (sampleCount - 1) + sample.AirQuality) / sampleCount;
+
+                
+              /*  List<string> warnings = new List<string>();
                 if (sampleCount > 0)
                 {
                     if (sample.LightLevel < avgLightLevel * LowerFactor)
@@ -259,11 +265,11 @@ namespace Server
                     if (sample.AirQuality > avgAirQuality * UpperFactor)
                         warnings.Add($"AirQuality odstupa više od +25% od proseka.  \n AQ={sample.AirQuality:F2} (prosek={avgAirQuality:F2})\" ");
 
-                }
+                }*/
 
 
                 //detekcija nagle promene svetla
-                if (sampleCount > 0)
+                if (sampleCount > 1)
                 {
                     double deltaL = sample.LightLevel - lastLightLevel;
 
@@ -280,14 +286,14 @@ namespace Server
 
                     //odstupanje +/- 25% od proseka
                     if (sample.LightLevel < avgLightLevel * LowerFactor)
-                        events.RaiseOutOfBandWarning("LightLevel ispod očekivane vrednosti", sample, avgLightLevel);
+                        events.RaiseOutOfBandWarning("LightLevel odstupa više od -25% od proseka.", sample, avgLightLevel);
                     else if (sample.LightLevel > avgLightLevel * UpperFactor)
-                        events.RaiseOutOfBandWarning("LightLevel iznad očekivane vrednosti", sample, avgLightLevel);
+                        events.RaiseOutOfBandWarning("LightLevel odstupa više od +25% od proseka.", sample, avgLightLevel);
 
                 }
 
                 //detekcija nagle promene RelativeHumidity
-                if (sampleCount > 0)
+                if (sampleCount > 1)
                 {
                     double deltaRH = sample.RelativeHumidity - lastRelativeHumidity;
                     if (Math.Abs(deltaRH) > RH_threshold)
@@ -302,13 +308,13 @@ namespace Server
                     }
 
                     if (sample.RelativeHumidity < avgRelativeHumidity * LowerFactor)
-                        events.RaiseOutOfBandWarning("RelativeHumidity ispod ocekivane vrednosti", sample, avgRelativeHumidity);
+                        events.RaiseOutOfBandWarning("RelativeHumidity odstupa više od -25% od proseka.", sample, avgRelativeHumidity);
                     else if (sample.RelativeHumidity > avgRelativeHumidity * UpperFactor)
-                        events.RaiseOutOfBandWarning("RelativeHumidity iznad ocekivane vrednosti", sample, avgRelativeHumidity);
+                        events.RaiseOutOfBandWarning("RelativeHumidity odstupa više od +25% od proseka.", sample, avgRelativeHumidity);
                 }
 
                 //detekcija nagle promene AirQuality
-                if (sampleCount > 0)
+                if (sampleCount > 1)
                 {
                     double deltaAQ = sample.AirQuality - lastAirQuality;
                     if (Math.Abs(deltaAQ) > AQ_threshold)
@@ -323,18 +329,14 @@ namespace Server
                     }
 
                     if (sample.AirQuality < avgAirQuality * LowerFactor)
-                        events.RaiseOutOfBandWarning("AirQuality ispod ocekivane vrednosti", sample, avgAirQuality);
+                        events.RaiseOutOfBandWarning("AirQuality odstupa više od -25% od proseka.", sample, avgAirQuality);
                     else if (sample.AirQuality > avgAirQuality * UpperFactor)
-                        events.RaiseOutOfBandWarning("AirQuality iznad ocekivane vrednosti", sample, avgAirQuality);
+                        events.RaiseOutOfBandWarning("AirQuality odstupa više od +25% od proseka.", sample, avgAirQuality);
                 }
 
 
                 //azuriranje proseka i prethodnih vrednosti
-                sampleCount++;
-                avgLightLevel = (avgLightLevel * (sampleCount - 1) + sample.LightLevel) / sampleCount;
-                avgRelativeHumidity = (avgRelativeHumidity * (sampleCount - 1) + sample.RelativeHumidity) / sampleCount;
-                avgAirQuality = (avgAirQuality * (sampleCount - 1) + sample.AirQuality) / sampleCount;
-
+               
                 lastLightLevel = sample.LightLevel;
                 lastRelativeHumidity = sample.RelativeHumidity;
                 lastAirQuality = sample.AirQuality;
@@ -348,8 +350,8 @@ namespace Server
                 Console.WriteLine($"[Server] Prenos u toku... primljen uzorak {sampleCount}/130");
                 Console.ResetColor();
                 events.RaiseSampleReceived(sample);
-                foreach (var warning in warnings)
-                    events.RaiseWarning(warning, sample);
+                //foreach (var warning in warnings)
+                  //  events.RaiseWarning(warning, sample);
 
                 Console.WriteLine("-----------------------------------------------------------");
             }
@@ -357,16 +359,13 @@ namespace Server
             {
                 sessionCSVFiles.RejectsWriter.WriteLine(line + ", izuzetak: " + ex.Message);
                 sessionCSVFiles.RejectsWriter.Flush();
-                sessionCSVFiles.Dispose();
+                //sessionCSVFiles.Dispose();
                 throw;
             }
         }
 
         public string EndSession()
         {
-            /*Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[Server] Završen prenos.");
-            Console.ResetColor();*/
             
             if (transferStarted)
                 events.RaiseTransferCompleted();
